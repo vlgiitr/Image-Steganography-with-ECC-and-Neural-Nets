@@ -82,12 +82,13 @@ def elliptic_curve_addition(self, other: Point) -> Point:
         return INF
     # compute the "slope"
     if self.x == other.x: # (self.y = other.y is guaranteed too per above check)
-        m = (3 * self.x**2 + self.curve.a) * inv(2 * self.y, self.curve.p)
+        m = ((3 * self.x**2 + self.curve.a) * inv(2 * self.y, self.curve.p)) % self.curve.p
     else:
-        m = (self.y - other.y) * inv(self.x - other.x, self.curve.p)
+        m = ((self.y - other.y) * inv((self.x - other.x) % self.curve.p, self.curve.p)) % self.curve.p
     # compute the new point
     rx = (m**2 - self.x - other.x) % self.curve.p
-    ry = (-(m*(rx - self.x) + self.y)) % self.curve.p
+    # ry = (rx**3 + 7) % self.curve.p
+    ry = ((m*(self.x - rx) - self.y)) % self.curve.p
     return Point(self.curve, rx, ry)
 
 Point.__add__ = elliptic_curve_addition # monkey patch addition into the Point class
@@ -109,4 +110,5 @@ Point.__rmul__ = double_and_add
 
 
 public_key = 3*G
+secret_key = 3
 key_length = 256

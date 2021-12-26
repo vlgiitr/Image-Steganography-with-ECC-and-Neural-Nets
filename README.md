@@ -4,6 +4,6 @@ Paper : [A New High Capacity Image Steganography Method Combined With Image Elli
 
 ## Project Structure
 
-ecc.py : Implements ECC Cryptography. Uses secp256k1 curve
-encrypt.py : Follows the encryption method in the paper closely
-utlis.py : General utils
+- ecc.py : Implements ECC Cryptography. Uses secp256k1 curve
+- encrypt.py : Follows the encryption method in the paper closely
+- utlis.py : General utils
