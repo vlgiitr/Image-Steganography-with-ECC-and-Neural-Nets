@@ -1,0 +1,8 @@
+argparse
+numpy==1.21.5
+requests
+torch-dct==0.1.5
+tensorboard==2.7.0
+torch-summary==1.4.5
+tqdm==4.62.3
+torch==1.10.1
