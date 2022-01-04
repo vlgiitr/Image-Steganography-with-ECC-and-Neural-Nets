@@ -12,7 +12,7 @@ Paper : [A New High Capacity Image Steganography Method Combined With Image Elli
 
 ## Setup Instructions
 
-- git clone https://github.com/vlgiitr/PassFormer.git
-- virtualenv venv
-- source venv/bin/activate
-- pip install -r requirements.txt
+- Clone this repo
+- Create a virtual enviournment `virtualenv venv`
+- Activate the enviournment `source venv/bin/activate`
+- Install the requirements `pip install -r requirements.txt`
