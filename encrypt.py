@@ -1,11 +1,28 @@
-from utils import get_bin
 import numpy as np
 import imageio
 import random
+from torch import stack, tensor
 from ecc import key_length, public_key, G, bitcoin_curve
 import ecc as ECC
 
 random_key = 18398800208287441760983961865782355938679551141855098527665653562118439265414
+
+def get_bin(x, n=0):
+    """
+    Get the binary representation of x.
+
+    Parameters
+    ----------
+    x : int
+    n : int
+        Minimum number of digits. If x needs less digits in binary, the rest
+        is filled with zeros.
+
+    Returns
+    -------
+    str
+    """
+    return format(x, 'b').zfill(n)
 
 def load_image(filepath):
   image = imageio.imread(filepath)
@@ -20,7 +37,6 @@ def extract_channels(image, channels):
   for channel in range(channels):
     pixels.append(image[:, :, channel].flatten())
   return pixels
-
 
 def group_pixels(channel, key_length):
   # Randomly add 1 or 2 to the pixel values
@@ -38,9 +54,7 @@ def group_pixels(channel, key_length):
       b.append(grp)
       grp = ""
       group_length = 0
-
   return b
-
 
 def make_points_and_encrypt(grouped_pixels, public_key):
   # Generate a random number
@@ -56,9 +70,7 @@ def make_points_and_encrypt(grouped_pixels, public_key):
     point = ECC.Point(ECC.bitcoin_curve, int(grouped_pixels[i], 2), int(grouped_pixels[i+1], 2))
     point = point + keyPb
     PC.append(point)
-
   return PC
-
 
 def get_channel_for_cipher_image(PC, width):
   pixel_values = []
@@ -74,7 +86,6 @@ def get_channel_for_cipher_image(PC, width):
     bins = get_bin(y, 256)
     nums = [int(bins[i:i+8], 2) for i in range(0, len(bins), 8)]
     pixel_values.append(nums)
-
 
   for i in pixel_values:
     while (len(i)!=32):
@@ -96,3 +107,9 @@ def encrypt_image(filepath):
     secret_channels.append(sec_channel)
 
   return np.dstack((tuple(secret_channels)))
+
+def encrypt_batch(images):
+    img_list = []
+    for image in images:
+        img_list.append(tensor(encrypt_image(image)))
+    return stack(tensors=img_list, dim=0)

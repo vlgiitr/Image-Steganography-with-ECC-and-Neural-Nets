@@ -5,4 +5,7 @@ __pycache__
 *.zip
 data/preprocessed
 venv
-scripts/setup.sh
+checkpoints/
+**/data/host_images/
+**/data/original_images/
+**/runs/steganography

@@ -1,32 +1,45 @@
-import torch_dct as dct
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.fft import fft2, ifft2
 
 class EncryptionModule():
-    def __init__(self):
-        pass
+    def __init__(self, hiding_network, device):
+        self.hiding_network = hiding_network
+        self.device = device
 
-    def encrypt(self, host_images, original_images, hiding_network):
+    def encrypt(self, H, O):
         """ 
         input: original secret images O
         output: container images C
         """
-        secret_images = dct.dct_2d(images)
-        encrypted_images = secret_images #ecc(secret_images)
-        container_images = hiding_network(torch.stack(tensors = [encrypted_images, host_images], dim = 1).to(device))
-        return container_images, encrypted_images
+        #S = fft2(O)
+        S=O
+        E = S #ecc(secret_images)
+        images=[]
+        for x,y in zip(E, H):
+            images.append(torch.cat((x,y)))
+
+        #print(torch.stack(images, dim=0).size())
+        images = torch.stack(images, dim=0).to(self.device)
+        C = self.hiding_network(images)
+        return (C, E)
 
 class DecryptionModule():
-    def __init__(self):
-        pass
+    def __init__(self, revealing_network, device):
+        self.revealing_network = revealing_network
+        self.device = device
     
-    def encrypt(self, container_images, revealing_network):
+    def decrypt(self, C):
         """ 
-        input: Revealed images R
+        input: Container images C
         output: Secret images S'
         """
-        revealed_images = revealed_network(container_images)
-        x = dct.idct_2d(revealed_images.detach().to(torch.device('cpu')))
-        reconstructed_secret_images = x #ecc(x)   #device cpu
-        return reconstructed_secret_images, revealed_images
+        R = self.revealing_network(C)
+        #x = inv_ecc(R.clone().detach().to(torch.device('cpu'))
+        x = R
+        S_ = x  #inverse dct to plot image
+        return (S_, R)
 
 class SegNet(nn.Module):
     """SegNet: A Deep Convolutional Encoder-Decoder Architecture for
@@ -81,7 +94,6 @@ class SegNet(nn.Module):
 
         return self.classifier(feat)
 
-
 class _Encoder(nn.Module):
     def __init__(self, n_in_feat, n_out_feat, n_blocks=2, drop_rate=0.5):
         """Encoder layer follows VGG rules + keeps pooling indices
@@ -109,7 +121,6 @@ class _Encoder(nn.Module):
     def forward(self, x):
         output = self.features(x)
         return F.max_pool2d(output, 2, 2, return_indices=True), output.size()
-
 
 class _Decoder(nn.Module):
     """Decoder layer decodes the features by unpooling with respect to
@@ -168,8 +179,8 @@ class RevealedNetwork(nn.Module):
       nn.BatchNorm2d(num_features = 64),
       nn.ReLU(inplace=True),
       
-      nn.Conv2d(in_channels = 64, out_channels = 6, kernel_size=3, padding= 'same', bias=False),
-      nn.BatchNorm2d(num_features = 6),
+      nn.Conv2d(in_channels = 64, out_channels = 3, kernel_size=3, padding= 'same', bias=False),
+      nn.BatchNorm2d(num_features = 3),
       nn.ReLU(inplace=True),)
 
     def forward(self, x):
