@@ -1,6 +1,8 @@
 import torch
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+from scipy.fftpack import idctn, dctn
 from torch.fft import fft2, ifft2
 
 class EncryptionModule():
@@ -14,8 +16,8 @@ class EncryptionModule():
         output: container images C
         """
         #S = fft2(O)
-        S=O
-        E = S #ecc(secret_images)
+        S = dctn(np.array(O), axes=(-1, -2))
+        E = torch.tensor(S) #ecc(secret_images)
         images=[]
         for x,y in zip(E, H):
             images.append(torch.cat((x,y)))
@@ -36,9 +38,9 @@ class DecryptionModule():
         output: Secret images S'
         """
         R = self.revealing_network(C)
-        #x = inv_ecc(R.clone().detach().to(torch.device('cpu'))
-        x = R
-        S_ = x  #inverse dct to plot image
+        #x = inv_ecc(R.clone().detach().to(torch.device('cpu')))
+        x = R.clone().detach().to(torch.device('cpu'))
+        S_ = idctn(np.array(x), axes=(-1, -2)) #inverse dct to plot image
         return (S_, R)
 
 class SegNet(nn.Module):

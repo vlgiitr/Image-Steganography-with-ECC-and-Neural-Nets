@@ -39,7 +39,7 @@ class Train():
     img_grid = torchvision.utils.make_grid(O.to(torch.device('cpu')), nrow=4)
     writer.add_image('original image at epoch {}'.format(epoch), img_grid)
 
-    img_grid = torchvision.utils.make_grid(S_.to(torch.device('cpu')), nrow=4)
+    img_grid = torchvision.utils.make_grid(torch.tensor(S_).to(torch.device('cpu')), nrow=4)
     writer.add_image('reconstructed secret image at epoch {}'.format(epoch), img_grid)
 
   def train_one_epoch(self, running_loss):
@@ -63,9 +63,9 @@ class Train():
     for epoch in tqdm(range(num_epochs)):
       self.add_images_to_tensorboard(epoch)
       running_loss = self.train_one_epoch(running_loss = running_loss)
-      torch.save({'hiding_network_state_dict': self.encryption_module.hiding_network.state_dict(), 
-      'revealing_network_state_dict': self.decryption_module.revealing_network.state_dict(), 
-      'optimizer_state_dict': optimizer.state_dict()}, os.path.join(PATH, 'model_at_epoch_{}.pth'.format(epoch)))
+      #torch.save({'hiding_network_state_dict': self.encryption_module.hiding_network.state_dict(), 
+      #'revealing_network_state_dict': self.decryption_module.revealing_network.state_dict(), 
+      #'optimizer_state_dict': optimizer.state_dict()}, os.path.join(PATH, 'model_at_epoch_{}.pth'.format(epoch)))
       torch.cuda.empty_cache()
 
 if __name__=='__main__':

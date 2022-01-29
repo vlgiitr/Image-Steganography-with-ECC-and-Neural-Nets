@@ -2,6 +2,7 @@ argparse
 matplotlib==3.5.1
 numpy==1.21.5
 requests
+scipy==1.7.3
 torch-dct==0.1.5
 tensorboard==2.7.0
 torch-summary==1.4.5
