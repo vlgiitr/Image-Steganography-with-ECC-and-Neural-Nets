@@ -24,6 +24,7 @@ def get_bin(x, n=0):
     """
     return format(x, 'b').zfill(n)
 
+
 def group_pixels(channel, key_length):
   members = key_length//8 - 1
   group_length = 0
@@ -75,8 +76,8 @@ def get_channel_for_cipher_image(PC, width):
   return(pixel_values)
 
 
-def decrypt_image(filepath):
-  image, channels, length, width = encrypt.load_image(filepath)
+def decrypt_image(image_tensor):
+  image, channels, length, width = encrypt.load_tensor(image_tensor)
   pixels_list = encrypt.extract_channels(image, channels)
 
   original_channels = []

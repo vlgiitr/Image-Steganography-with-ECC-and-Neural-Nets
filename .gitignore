@@ -2,6 +2,7 @@ __pycache__
 .ipynb_checkpoints
 .idea
 *__tests
+*.py__tests
 *.zip
 data/preprocessed
 venv

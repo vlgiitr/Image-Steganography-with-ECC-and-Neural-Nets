@@ -24,6 +24,14 @@ def get_bin(x, n=0):
     """
     return format(x, 'b').zfill(n)
 
+def load_tensor(tensor):
+  image = tensor.cpu().detach().numpy()
+  channels = image.shape[-1] if image.ndim == 3 else 1
+  length = image.shape[0]
+  width = image.shape[1]
+
+  return image, channels, length, width
+
 def load_image(filepath):
   image = imageio.imread(filepath)
   channels = image.shape[-1] if image.ndim == 3 else 1
@@ -95,8 +103,8 @@ def get_channel_for_cipher_image(PC, width):
   return pixel_values
 
 
-def encrypt_image(filepath):
-  image, channels, length, width = load_image(filepath)
+def encrypt_image(image_tensor):
+  image, channels, length, width = load_tensor(image_tensor)
   pixels_list = extract_channels(image, channels)
   secret_channels = []
 
