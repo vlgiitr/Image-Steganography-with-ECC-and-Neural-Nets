@@ -2,7 +2,11 @@ __pycache__
 .ipynb_checkpoints
 .idea
 *__tests
+*.py__tests
 *.zip
 data/preprocessed
 venv
-scripts/setup.sh
+checkpoints/
+**/data/host_images/
+**/data/original_images/
+**/runs/steganography
