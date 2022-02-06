@@ -24,8 +24,8 @@ def get_bin(x, n=0):
     """
     return format(x, 'b').zfill(n)
 
-def load_tensor(tensor):
-  image = tensor.cpu().detach().numpy()
+def load_tensor(image):
+  #image = tensor.numpy()
   channels = image.shape[-1] if image.ndim == 3 else 1
   length = image.shape[0]
   width = image.shape[1]
@@ -74,7 +74,7 @@ def make_points_and_encrypt(grouped_pixels, public_key):
   keyG = random_key*G
 
   PC = []
-  for i in range(0, len(grouped_pixels), 2):
+  for i in range(0, len(grouped_pixels)-1, 2):
     point = ECC.Point(ECC.bitcoin_curve, int(grouped_pixels[i], 2), int(grouped_pixels[i+1], 2))
     point = point + keyPb
     PC.append(point)
@@ -99,6 +99,7 @@ def get_channel_for_cipher_image(PC, width):
     while (len(i)!=32):
       i.append(0)
 
+  #print("error here #####################", np.array(pixel_values).shape, "width {}".format(width))
   pixel_values = np.asarray(pixel_values).flatten().reshape(width, -1)
   return pixel_values
 
@@ -117,6 +118,7 @@ def encrypt_image(image_tensor):
   return np.dstack((tuple(secret_channels)))
 
 def encrypt_batch(images):
+    print(images.dtype)
     img_list = []
     for image in images:
         img_list.append(tensor(encrypt_image(image)))

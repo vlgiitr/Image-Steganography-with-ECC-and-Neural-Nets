@@ -43,15 +43,15 @@ class ImageNet(Dataset):
 
     image = Image.open(img_path)
     if self.resize:
-      image = image.resize((224,224))   #resize to default 224*224 for imagenet images
+      image = image.resize((256,256))   #resize to default 224*224 for imagenet images
 
     image = np.array(image)/255
     if self.normalize is True:
-      image = self.normalize_image(image).to(torch.float32) #get images as 32bit torch float tensors
+      image = self.normalize_image(image).to(torch.uint8) #get images as 8bit torch int tensors (required for image encryption)
       #print(image.dtype)
     else:
       image = np.transpose(image,(2,0,1))
-      image = torch.from_numpy(image).type(torch.float32) #get images as 32bit torch float tensors
+      image = torch.from_numpy(image).type(torch.uint8) #get images as 8bit torch int tensors (required for image encryption)
       #print(image.dtype)
     return image
 

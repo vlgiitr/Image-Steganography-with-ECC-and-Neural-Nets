@@ -5,7 +5,6 @@ import torch.nn.functional as F
 import encrypt as encrypt
 import decrypt as decrypt
 from scipy.fftpack import idctn, dctn
-from torch.fft import fft2, ifft2
 
 class EncryptionModule():
     def __init__(self, hiding_network, device):
@@ -17,10 +16,18 @@ class EncryptionModule():
         input: original secret images O
         output: container images C
         """
-        #S = fft2(O)
-        S = dctn(np.array(O), axes=(-1, -2))
-        # E = torch.tensor(S) #ecc(secret_images)
-        E = encrypt.encrypt_batch(torch.tensor(S))
+
+        #S = dctn(np.array(O, dtype = np.uint8), axes=(-1, -2))
+        #E = encrypt.encrypt_batch(S) #ecc(secret_images)
+
+        # change the order of operations
+        print("######### O #############", O.dtype, O.shape)
+        S = encrypt.encrypt_batch(np.array(O, dtype = np.uint8))
+        print("######### S #############", S.dtype, S.shape)
+        x = dctn(np.array(S, dtype = np.uint8), axes=(-1, -2))
+        E = torch.from_numpy(x)
+        #E = torch.from_numpy(dctn(torch.from_numpy(S), axes=(-1, -2)))
+
         images=[]
         for x,y in zip(E, H):
             images.append(torch.cat((x,y)))
@@ -41,9 +48,12 @@ class DecryptionModule():
         output: Secret images S'
         """
         R = self.revealing_network(C)
-        x = decrypt.decrypt_batch(R.clone().detach().to(torch.device('cpu')))
-        # x = R.clone().detach().to(torch.device('cpu'))
-        S_ = idctn(np.array(x), axes=(-1, -2)) #inverse dct to plot image
+        #x = decrypt.decrypt_batch(R.clone().detach().to(torch.device('cpu')))
+        #S_ = idctn(np.array(x), axes=(-1, -2)) #inverse dct to plot image
+
+        #change the order of operations
+        x = idctn(np.array(R.clone().detach().to(torch.device('cpu'))), axes=(-1, -2)) #inverse dct to plot image ()
+        S_ = decrypt.decrypt_batch(x.astype(np.uint8), axes=(-1, -2)) #inverse dct to plot image
         return (S_, R)
 
 class SegNet(nn.Module):

@@ -33,6 +33,8 @@ class Train():
 
   def add_images_to_tensorboard(self, epoch):
     O, H = next(iter(self.O_loader)), next(iter(self.H_loader))
+    #print(O.dtype, H.dtype)
+    
     C, E = self.encryption_module.encrypt(H = H, O = O)
     S_, R= self.decryption_module.decrypt(C = C)
 
@@ -132,7 +134,7 @@ if __name__=='__main__':
 
     O_dataset = ImageNet(img_dir = './data/preprocessed/tiny-imagenet-200/train')
     O_loader = DataLoader(O_dataset, batch_size = 4, shuffle=True, num_workers=2, collate_fn= None)   
-    print('Num_Batches: {}'.format(len(O_loader)))
+    print('Num_Batches: {}'.format(len(O_loader)),"dtype: {}".format(next(iter(H_loader)).dtype))
 
     print('Starting training')
     trainer = Train(encryption_module=encryption_module, decryption_module=decryption_module, O_loader = O_loader, H_loader = H_loader)
