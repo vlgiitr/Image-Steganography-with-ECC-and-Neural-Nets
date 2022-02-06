@@ -20,7 +20,7 @@ class EncryptionModule():
         #S = fft2(O)
         S = dctn(np.array(O), axes=(-1, -2))
         # E = torch.tensor(S) #ecc(secret_images)
-        E = torch.tensor(encrypt.encrypt_batch(S))
+        E = encrypt.encrypt_batch(torch.tensor(S))
         images=[]
         for x,y in zip(E, H):
             images.append(torch.cat((x,y)))

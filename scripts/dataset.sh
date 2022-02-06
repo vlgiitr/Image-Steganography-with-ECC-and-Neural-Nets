@@ -4,12 +4,13 @@ cd ./data/
 echo "starting dataset download to data folder"
 echo "-----------------------------------------------------"
 
-FILE=mnist.zip
+FILE=tiny-imagenet-200.zip
 if [ -e "$FILE" ]
 then
     echo "$FILE already downloaded"
 else
-    wget https://data.deepai.org/mnist.zip -P ./data/
+    echo "$FILE not found... Starting download"
+    wget http://cs231n.stanford.edu/tiny-imagenet-200.zip
 fi
 
 echo "-----------------------------------------------------"
@@ -22,5 +23,5 @@ then
 else
     mkdir ./preprocessed 
     pwd
-    unzip mnist.zip -d ./preprocessed
+    unzip tiny-imagenet-200.zip -d ./preprocessed
 fi

@@ -33,11 +33,17 @@ class Train():
 
   def add_images_to_tensorboard(self, epoch):
     O, H = next(iter(self.O_loader)), next(iter(self.H_loader))
-    C, E = encryption_module.encrypt(H = H, O = O)
-    S_, R= decryption_module.decrypt(C = C)
+    C, E = self.encryption_module.encrypt(H = H, O = O)
+    S_, R= self.decryption_module.decrypt(C = C)
 
     img_grid = torchvision.utils.make_grid(O.to(torch.device('cpu')), nrow=4)
     writer.add_image('original image at epoch {}'.format(epoch), img_grid)
+
+    img_grid = torchvision.utils.make_grid(H.to(torch.device('cpu')), nrow=4)
+    writer.add_image('host image at epoch {}'.format(epoch), img_grid)
+
+    img_grid = torchvision.utils.make_grid(C.to(torch.device('cpu')), nrow=4)
+    writer.add_image('host image at epoch {}'.format(epoch), img_grid)
 
     img_grid = torchvision.utils.make_grid(torch.tensor(S_).to(torch.device('cpu')), nrow=4)
     writer.add_image('reconstructed secret image at epoch {}'.format(epoch), img_grid)
@@ -46,8 +52,8 @@ class Train():
     #revealed-encrypted, host-container
     for iteration, (O, H) in enumerate(zip(self.O_loader, self.H_loader)):
       optimizer.zero_grad()
-      C, E = encryption_module.encrypt(H = H, O = O)
-      S_, R= decryption_module.decrypt(C = C)
+      C, E = self.encryption_module.encrypt(H = H, O = O)
+      S_, R= self.decryption_module.decrypt(C = C)
       loss = self.lossfunction(E, R, H, C)
       loss.backward(retain_graph=False, create_graph=False)
 
@@ -106,6 +112,10 @@ if __name__=='__main__':
 
     hiding_network = hiding_network.to(device)
     revealing_network = revealing_network.to(device)
+    
+    #create optimizer
+    optimizer = torch.optim.Adam(itertools.chain(revealing_network.parameters(), 
+      hiding_network.parameters()), lr= lr, betas=(beta1, beta2))
 
     if resume_training:
       checkpoint = torch.load(os.path.join(PATH, 'model.pth'), map_location = device)
@@ -116,16 +126,12 @@ if __name__=='__main__':
     encryption_module = EncryptionModule(hiding_network, device)
     decryption_module = DecryptionModule(revealing_network, device)
 
-    #create optimizer
-    optimizer = torch.optim.Adam(itertools.chain(revealing_network.parameters(), 
-      hiding_network.parameters()), lr= lr, betas=(beta1, beta2))
-
     print('Loading Data')
-    H_dataset = ImageNet(img_dir = './data/host_images')
-    H_loader = DataLoader(H_dataset, batch_size = 2, shuffle=True, num_workers=2, collate_fn= None)
+    H_dataset = ImageNet(img_dir = './data/preprocessed/tiny-imagenet-200/train')
+    H_loader = DataLoader(H_dataset, batch_size = 4, shuffle=True, num_workers=2, collate_fn= None)
 
-    O_dataset = ImageNet(img_dir = './data/original_images')
-    O_loader = DataLoader(O_dataset, batch_size = 2, shuffle=True, num_workers=2, collate_fn= None)   
+    O_dataset = ImageNet(img_dir = './data/preprocessed/tiny-imagenet-200/train')
+    O_loader = DataLoader(O_dataset, batch_size = 4, shuffle=True, num_workers=2, collate_fn= None)   
     print('Num_Batches: {}'.format(len(O_loader)))
 
     print('Starting training')
