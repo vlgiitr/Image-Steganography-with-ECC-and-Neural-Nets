@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 import imageio
 import random
 from torch import stack, tensor
@@ -118,7 +119,8 @@ def encrypt_image(image_tensor):
   return np.dstack((tuple(secret_channels)))
 
 def encrypt_batch(images):
-    print(images.dtype)
+    images = np.transpose(images, (0, 2, 3, 1))
+    print("encrypt batch", images.dtype, images.shape)
     img_list = []
     for image in images:
         img_list.append(tensor(encrypt_image(image)))

@@ -45,9 +45,10 @@ class Train():
     writer.add_image('host image at epoch {}'.format(epoch), img_grid)
 
     img_grid = torchvision.utils.make_grid(C.to(torch.device('cpu')), nrow=4)
-    writer.add_image('host image at epoch {}'.format(epoch), img_grid)
+    writer.add_image('container image at epoch {}'.format(epoch), img_grid)
 
     img_grid = torchvision.utils.make_grid(torch.tensor(S_).to(torch.device('cpu')), nrow=4)
+    print("error###########################", type(img_grid), img_grid.dtype, img_grid.size())
     writer.add_image('reconstructed secret image at epoch {}'.format(epoch), img_grid)
 
   def train_one_epoch(self, running_loss):

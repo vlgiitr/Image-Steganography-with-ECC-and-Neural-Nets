@@ -25,16 +25,21 @@ class EncryptionModule():
         S = encrypt.encrypt_batch(np.array(O, dtype = np.uint8))
         print("######### S #############", S.dtype, S.shape)
         x = dctn(np.array(S, dtype = np.uint8), axes=(-1, -2))
-        E = torch.from_numpy(x)
-        #E = torch.from_numpy(dctn(torch.from_numpy(S), axes=(-1, -2)))
+
+        E = torch.from_numpy(x).to(torch.float32)
+        E = torch.transpose(E, 2, 3)
+        E = torch.transpose(E, 1, 2)
+        #print("E#########", E.dtype)
 
         images=[]
+        print(E.size())
         for x,y in zip(E, H):
             images.append(torch.cat((x,y)))
 
         #print(torch.stack(images, dim=0).size())
         images = torch.stack(images, dim=0).to(self.device)
         C = self.hiding_network(images)
+        print("c image####### shape", C.size())
         return (C, E)
 
 class DecryptionModule():
@@ -48,12 +53,16 @@ class DecryptionModule():
         output: Secret images S'
         """
         R = self.revealing_network(C)
+        print("R shape ##########", R.size())
         #x = decrypt.decrypt_batch(R.clone().detach().to(torch.device('cpu')))
         #S_ = idctn(np.array(x), axes=(-1, -2)) #inverse dct to plot image
 
         #change the order of operations
         x = idctn(np.array(R.clone().detach().to(torch.device('cpu'))), axes=(-1, -2)) #inverse dct to plot image ()
-        S_ = decrypt.decrypt_batch(x.astype(np.uint8), axes=(-1, -2)) #inverse dct to plot image
+        #print("x in decrypt#########", type(x), x.type)
+        S_ = decrypt.decrypt_batch(x.astype(np.uint8)) #inverse dct to plot image
+        S_ = S_.to(torch.float32)
+        print("S_ in decrypt#########", type(S_), S_.dtype)
         return (S_, R)
 
 class SegNet(nn.Module):

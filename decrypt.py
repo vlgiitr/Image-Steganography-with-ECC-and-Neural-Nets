@@ -2,7 +2,7 @@ import encrypt as encrypt
 from encrypt import random_key
 import numpy as np
 import ecc
-from torch import stack, tensor
+from torch import stack, tensor, transpose
 from ecc import G, key_length, public_key
 from ecc import secret_key as private_key
 from ecc import bitcoin_curve as BC
@@ -90,7 +90,15 @@ def decrypt_image(image_tensor):
   return np.dstack((tuple(original_channels)))
 
 def decrypt_batch(images):
+    print("decrypt_batch images", images.shape)
+    images = np.transpose(images, (0, 2, 3, 1))
+    print("decrypt_batch images after transpose", images.shape)
     img_list = []
     for image in images:
         img_list.append(tensor(decrypt_image(image)))
-    return stack(tensors=img_list, dim=0)
+    x = stack(tensors=img_list, dim=0)
+    print(x.size())
+    x = transpose(x, 2, 3)
+    x = transpose(x, 1, 2)
+    print("###########################################", x.size())
+    return x
